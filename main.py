@@ -1,16 +1,6 @@
 from colorama import *
 import requests
 
-'''
-for i in guess: 
-    if i == word[0:-1:1] 
-        if i == for j in word: 
-            correct(i) 
-        else: 
-            correct_wrong()
-logic:
-'''
-
 print("WARNING! Program may pick a hard word based of the api design. Sorry!")
 while True:
     config_one = input("how much letters should your wordle be? (minimum is 3)")
@@ -22,6 +12,23 @@ while True:
     
 init(autoreset=True) #colorama start coloring!
 
+def check(guess: str, answer: str, length: int):
+    line = []
+    for i in range(length): #iterate thru each character
+        if guess[i] == answer[i]:
+            line.append("green")
+        elif guess[i] in answer:
+            line.append("yellow")
+        elif guess[i] not in answer:
+            line.append("grey")
+    for i in range(len(line)):
+        if line[i] == "green":
+            print(Style.BRIGHT + Fore.WHITE + Back.GREEN + " " + guess[i] + " ", end="") #green
+        elif line[i] == "yellow":
+            print(Style.BRIGHT + Fore.WHITE + Back.YELLOW + " " + guess[i] + " ", end="") #yellow
+        elif line[i] == "grey":
+            print(Style.BRIGHT + Fore.WHITE + Back.LIGHTBLACK_EX + " " + guess[i] + " ", end="") #yello
+
 def main():
     url = "https://random-word-api.herokuapp.com/word"
     params = {"length": length}
@@ -29,34 +36,14 @@ def main():
     response.raise_for_status()
 
     word = response.json()[0]
-    print(word) #for debug
-    answer = list(word)
+    #print(word) #for debug
     
     for count in range(6): #attempts left
-        for i in range(length): #iterate thru each character
-            line = []
-            guess = list(input())
-        
-            if len(guess) != len(answer):
-                print("ERROR! THE INPUTTED GUESS IS NOT THE SAME LENGTH AS ANSWER")
-
-            if guess[i] == answer[i]:
-                line.append("green")
-                print(Style.BRIGHT + Back.GREEN + Fore.WHITE + " " + guess[i] + " ",end="")
-                break
-            elif guess[i] in answer:
-                line.append("yellow")
-                print(Style.BRIGHT + Back.YELLOW + Fore.WHITE + " " + guess[i] + " ",end="")
-                break
-            elif guess[i] not in answer:
-                line.append("grey")
-                print(Style.BRIGHT + Back.LIGHTBLACK_EX + Fore.WHITE + " " + guess[i] + " ",end="")
-                break
-            elif line[0:-1] == "green":
-                print("YOU WIN!")
-                return
-
-    print("you lost! the answer was " + answer +"!")
+        guess = input()
+        if len(guess) != len(word):
+            print("ERROR! THE INPUTTED GUESS IS NOT THE SAME LENGTH AS ANSWER")
+        check(guess, word, length)
+        print("")
 
 if __name__ == "__main__":
     main()
