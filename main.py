@@ -6,7 +6,7 @@ def check(guess: str, answer: str, length: int):
     for i in range(length): #iterate thru each character
         if guess[i] == answer[i]:
             line.append("green")
-        elif guess[i] in answer and guess[i] != answer[i]: #error: after 1st if statement it goes to yellow and evaluates to both instead
+        elif guess[i] in answer: 
             line.append("yellow")
         elif guess[i] not in answer:
             line.append("grey")
@@ -17,12 +17,18 @@ def check(guess: str, answer: str, length: int):
             print(Style.BRIGHT + Fore.WHITE + Back.YELLOW + " " + guess[i] + " ", end="") #yellow
         elif line[i] == "grey":
             print(Style.BRIGHT + Fore.WHITE + Back.LIGHTBLACK_EX + " " + guess[i] + " ", end="") #yello
-    res = len(set(line))
-    if res == 1:
+    res = set(line)
+    if res == "green":
         return True
     else:
         return False
-
+def pick_letter(length):
+    url = "https://random-word-api.herokuapp.com/word"
+    params = {"length": length}
+    response = requests.get(url, params=params, timeout=5,)
+    response.raise_for_status()
+    word = response.json()[0]
+    return word
 def main():
     print("\nWARNING! Program may pick a hard word based of the api design. Sorry!")
     while True:
@@ -35,15 +41,7 @@ def main():
             break
     
     init(autoreset=True) #colorama start coloring!
-
-    url = "https://random-word-api.herokuapp.com/word"
-    params = {"length": length}
-    response = requests.get(url, params=params, timeout=5,)
-    response.raise_for_status()
-
-    word = response.json()[0]
-    print(word) #for debug
-    
+    word = pick_letter(length)
     for count in range(6): #attempts left
         guess = input()
         if len(guess) != len(word):
@@ -57,8 +55,7 @@ def main():
             else:
                 return
         else:
-            print("\n")
-            continue
+            pass
     print("\n You Lost!😔")
     choice = input("Would you like to try again? (yes/no)")
     if choice == "yes":
