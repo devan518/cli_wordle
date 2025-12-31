@@ -1,5 +1,11 @@
 from colorama import *
 import requests
+from google import genai
+
+#init ai client for generating word and also hint
+client = genai.Client(api_key="AIzaSyDxSUHNpAOb5VjoVB0KThspuu1c7d2t9SE")
+#to make sure that ai doesnt show the same words over and over
+words = []
 
 def check(guess: str, answer: str, length: int):
     line = []
@@ -22,15 +28,46 @@ def check(guess: str, answer: str, length: int):
         return True
     else:
         return False
-def pick_letter(length):
-    url = "https://random-word-api.herokuapp.com/word"
-    params = {"length": length}
-    response = requests.get(url, params=params, timeout=5,)
-    response.raise_for_status()
-    word = response.json()[0]
-    return word
+def pick_word(length):
+    prompt = f'You are WordleBot. Your job is to create words to be fit in a wordle game. Here are your instructions: Generate a word (respond with only that one word): that is {length} letters long, is not one of these words: {words}, and respond in lowercase.'
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+    )
+    return response.text
+def hint(word):
+    prompt = f'You are HintBot. Respond with a short, one sentence hint that doesnt give it away, but just gives the player an idea of what the word is, for guessing a word in a wordle game. Your word is {word}'
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt,
+    )
+    return response.text
+
 def main():
-    print("\nWARNING! Program may pick a hard word based of the api design. Sorry!")
+    banner = '''
+ ██████╗ ██╗     ██╗
+██╔════╝ ██║     ██║
+██║      ██║     ██║
+██║      ██║     ██║
+╚██████╗ ███████╗██║
+ ╚═════╝ ╚══════╝╚═╝
+
+██╗    ██╗ ██████╗ ██████╗ ██████╗ ██╗     ███████╗
+██║    ██║██╔═══██╗██╔══██╗██╔══██╗██║     ██╔════╝
+██║ █╗ ██║██║   ██║██████╔╝██║  ██║██║     █████╗  
+██║███╗██║██║   ██║██╔══██╗██║  ██║██║     ██╔══╝  
+╚███╔███╔╝╚██████╔╝██║  ██║██████╔╝███████╗███████╗
+ ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═╝╚═════╝ ╚══════╝╚══════╝
+
+Hello! This is my  version of wordle, written as a cli!
+features:
+-generates word using ai instead of pre picked words so that is doesnt run out!
+
+-use "/hint" as a command to get a hint!
+
+-custom wordle length!
+'''
+    print(banner)
     while True:
         config_one = input("how much letters should your wordle be? (minimum is 3)")
         length = int(config_one)
@@ -41,9 +78,13 @@ def main():
             break
     
     init(autoreset=True) #colorama start coloring!
-    word = pick_letter(length)
+    word = pick_word(length)
     for count in range(6): #attempts left
         guess = input()
+
+        if guess == "/hint":
+            print(hint(word))
+
         if len(guess) != len(word):
             print("ERROR! THE INPUTTED GUESS IS NOT THE SAME LENGTH AS ANSWER")
         
