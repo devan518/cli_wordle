@@ -4,10 +4,11 @@ import subprocess #copying to clipboard to share to friends
 import os #clearing terminal
 #to add- add support for mac
 
-
+with open('keys.txt', 'r') as f:
+    apikey = f.read()
 print("loading...")
 #init ai client for generating word and also hint
-client = genai.Client(api_key="AIzaSyDxSUHNpAOb5VjoVB0KThspuu1c7d2t9SE")
+client = genai.Client(api_key=apikey)
 #to make sure that ai doesnt show the same words over and over
 words = []
 
@@ -31,10 +32,7 @@ def check(guess: str, answer: str, length: int):
     result = set(line)
     if result == "green" and len(result) == 1:
         return True
-    else:
-        #return letters that were guessed that were green or yellow for the ai to guess
-        pass
-
+    
 def pick_word(length):
     prompt = f'You are WordleBot. Your job is to create words to be fit in a wordle game. Here are your instructions: Generate a word (respond with only that one word): that is {length} letters long, is not one of these words: {words}, and respond in lowercase.'
     response = client.models.generate_content(
